@@ -1,9 +1,10 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { generateStyledResume, ResumeData } from '../src/resume-generator';
+import { generateStyledResume, ResumeData } from './resume-generator';
+import * as fs from 'fs';
 import * as path from 'path';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Разрешаем CORS
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -21,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const data: ResumeData = req.body;
 
-    // Пути к ресурсам на Vercel
+    // Пути к ресурсам
     const basePath = process.cwd();
     const fontPath = path.join(basePath, 'assets/fonts/RobotoforLearning-Bold_0.ttf');
     const fontPath2 = path.join(basePath, 'assets/fonts/RobotoforLearning-Black_0.ttf');
@@ -29,15 +30,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const photoPath = path.join(basePath, 'assets/photo.jpg');
 
     console.log('📄 Generating PDF...');
-    console.log('🔤 Font 1:', fontPath);
-    console.log(' Font 2:', fontPath2);
-    console.log('🖼️ Photo:', photoPath);
+    console.log('🔤 Font 1:', fs.existsSync(fontPath) ? 'OK' : 'MISSING', fontPath);
+    console.log('🔤 Font 2:', fs.existsSync(fontPath2) ? 'OK' : 'MISSING', fontPath2);
+    console.log('🖼️ Photo:', fs.existsSync(photoPath) ? 'OK' : 'MISSING', photoPath);
 
-    // Генерируем PDF в буфер
-    const { PDFDocument } = require('pdfkit');
-    const fs = require('fs');
-    
-    // Временный файл для генерации
+    // Временный файл
     const os = require('os');
     const outputPath = path.join(os.tmpdir(), `resume_${Date.now()}.pdf`);
 
@@ -50,11 +47,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       svgBracesPath
     );
 
-    // Читаем файл и отправляем
+    // Читаем и отправляем
     const pdfBuffer = fs.readFileSync(outputPath);
-    
-    // Удаляем временный файл
-    fs.unlinkSync(outputPath);
+    fs.unlinkSync(outputPath); // Удаляем временный файл
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="resume.pdf"');
