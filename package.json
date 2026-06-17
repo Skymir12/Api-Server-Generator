@@ -18,6 +18,7 @@
     "@types/express": "^4.17.17",
     "@types/pdfkit": "^0.12.9",
     "@types/svg-to-pdfkit": "^0.1.0",
+    "@vercel/node": "^5.8.17",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.0"
   }
